@@ -1,6 +1,7 @@
 import os
 import pickle
 from file_utils import FileUtils
+import re
 
 
 def load_data(path):
@@ -18,18 +19,35 @@ def preprocess_and_save_data(dataset_path, token_lookup, create_lookup_tables):
     """
     Preprocess Text Data
     """
+    print('loading data set')
     text = load_data(dataset_path)
 
+    print('creating token punctuation dict')
     token_dict = token_lookup()
-    for key, token in token_dict.items():
-        text = text.replace(key, ' {} '.format(token))
 
+    print('replacing tokens')
+    text = multiple_replace(token_dict, text)
+
+    print('spliting text')
     text = text.split()
 
+    print('creating lookup tables')
     vocab_to_int, int_to_vocab = create_lookup_tables(text)
-    int_text = [vocab_to_int[word] for word in text]
-    pickle_dump((int_text, vocab_to_int, int_to_vocab, token_dict), 'preprocess.p')
 
+    print('saving data.')
+    pickle_dump(([vocab_to_int[word] for word in text], vocab_to_int, int_to_vocab, token_dict), 'preprocess.p')
+
+
+def multiple_replace(dict, text): 
+
+  """ Replace in 'text' all occurences of any key in the given
+  dictionary by its corresponding value.  Returns the new tring.""" 
+
+  # Create a regular expression  from the dictionary keys
+  regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+
+  # For each match, look-up corresponding value in dictionary
+  return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
 def load_preprocess():
     """
