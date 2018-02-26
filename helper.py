@@ -12,7 +12,7 @@ def load_data(path):
     with open(input_file, "r") as f:
         data = f.read()
 
-    return data.lower()
+    return data
 
 
 def preprocess_and_save_data(dataset_path, token_lookup, create_lookup_tables):
@@ -21,13 +21,18 @@ def preprocess_and_save_data(dataset_path, token_lookup, create_lookup_tables):
     """
     print('loading data set')
     text = load_data(dataset_path)
-
+    print('reducing (3)')
+    text = text[:len(text)//500]
     print('creating token punctuation dict')
     token_dict = token_lookup()
 
     print('replacing tokens')
-    text = multiple_replace(token_dict, text)
+    token_dict = token_lookup()
+    for key, token in token_dict.items():
+        text = text.replace(key, ' {} '.format(token))
 
+    print('to lower case')
+    text = text.lower()
     print('spliting text')
     text = text.split()
 
